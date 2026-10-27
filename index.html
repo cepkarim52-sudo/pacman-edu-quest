@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pac-Man Edu Quest</title>
+<style>
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;}button,input,select{ -webkit-appearance:none; appearance:none; }button{touch-action:none;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}canvas{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;touch-action:none}body{min-height:100vh;min-height:100dvh;padding-bottom:env(safe-area-inset-bottom,0px);overscroll-behavior:none}
+:root{--bg:#071225;--panel:#0b1d39;--blue:#16a8ff;--gold:#ffdc45;--text:#f5f8ff}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at top,#132c58,#040914 65%);color:var(--text);font-family:system-ui,Segoe UI,Arial,sans-serif}
+header{text-align:center;padding:12px 8px 6px}h1{margin:0;color:#ffd83d;text-shadow:0 0 15px #ff9c1a;font-size:clamp(23px,4vw,38px)}header p{margin:3px 0;color:#bfeaff}
+.app{max-width:1200px;margin:auto;padding:8px;display:grid;grid-template-columns:minmax(0,1.4fr) minmax(280px,.8fr);gap:12px}
+.panel{background:linear-gradient(145deg,#0e2445,#061126);border:1px solid #1769b8;border-radius:16px;padding:12px;box-shadow:0 0 20px #0066aa30}
+#mazeWrap{position:relative;min-width:0;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:none}canvas{display:block;width:min(100%,calc(100vh - 145px));height:auto;aspect-ratio:1/1;max-height:calc(100vh - 145px);margin:0 auto;border-radius:12px;background:#030a19;touch-action:none;border:1px solid #1456a2}
+@media(max-width:800px){canvas{width:100%;height:auto;max-height:calc(100vh - 190px)}}
+.stats{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:9px}.pill{background:#061329;border:1px solid #1b65a8;border-radius:9px;padding:6px 10px;font-weight:700;font-size:14px}
+label{display:block;font-size:13px;color:#bfeaff;margin:7px 0 4px}input,select,button{font:inherit;border-radius:9px;border:1px solid #2678bd;padding:9px;background:#07152b;color:#fff;width:100%}button{cursor:pointer;font-weight:800;background:linear-gradient(90deg,#087bdf,#12b9f0);border:0;color:white}button.secondary{background:#142947;border:1px solid #2877b7}button:active{transform:scale(.98)}
+.question{font-size:clamp(17px,2vw,22px);font-weight:800;line-height:1.35;margin:10px 0 12px;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:manipulation}.answers{display:grid;gap:8px;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}.answer{display:flex;align-items:center;gap:10px;background:#f5f8ff;color:#101d36;border-radius:12px;padding:10px;font-weight:750;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:manipulation}.letter{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;color:white;font-size:20px;flex-shrink:0}.A{background:#1478ef}.B{background:#ef3948}.C{background:#19a75b}
+.controls{display:grid;grid-template-columns:1fr 1fr 1fr;width:100%;max-width:100%;justify-content:stretch;gap:5px;margin:7px 0 2px}.controls button[data-dir='left']{justify-self:start}.controls button[data-dir='right']{justify-self:end}.controls button[data-dir='up'],.controls button[data-dir='down']{justify-self:center}.controls button{font-size:16px;padding:5px;height:38px;min-width:46px;width:46px;border-radius:7px;position:relative;touch-action:none;user-select:none;-webkit-user-select:none}.controls .empty{visibility:hidden}
+.small{font-size:12px;color:#b4cce9;line-height:1.5}.row{display:grid;grid-template-columns:1fr 1fr;gap:8px}.notice{padding:9px;border-radius:10px;background:#102a4b;margin-top:9px;color:#d7edff;font-size:13px}.hidden{display:none!important}
+@media(max-width:800px) and (orientation:landscape){
+ body{overflow:hidden}header{padding:3px 6px 2px}header h1{font-size:clamp(17px,3.2vw,25px)}header p{font-size:10px;margin:0}
+ .app{height:calc(100dvh - 34px);padding:2px;grid-template-columns:minmax(0,1.8fr) minmax(205px,.65fr);gap:5px;max-width:none}
+ .panel{padding:6px;border-radius:10px;min-height:0;overflow:auto}
+ #mazeWrap{display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;overflow:auto}
+ canvas{width:min(100%, calc(100dvh - 48px));height:auto;max-width:100%;max-height:calc(100dvh - 48px);aspect-ratio:1/1;align-self:center;flex-shrink:0}
+ .stats{gap:4px;margin-bottom:4px}.pill{font-size:10px;padding:4px 5px}
+ .controls{grid-template-columns:1fr 1fr 1fr;width:100%;max-width:100%;gap:3px;margin:3px 0 0}.controls button{height:30px;min-width:40px;width:40px;font-size:12px;padding:1px;border-radius:5px}.controls button[data-dir='left']{justify-self:start}.controls button[data-dir='right']{justify-self:end}.controls button[data-dir='up'],.controls button[data-dir='down']{justify-self:center}
+ .small{font-size:9px;line-height:1.15;margin:3px 0 0}
+ .gameSide{order:0}.gameSide h2{font-size:15px}.row{gap:5px}label{font-size:10px;margin:4px 0 2px}input,select,button{font-size:12px;padding:6px;border-radius:6px}
+ .question{font-size:clamp(14px,2.5vw,19px);margin:7px 0}.answers{gap:5px}.answer{padding:5px;gap:6px;border-radius:7px;font-size:12px}.letter{width:25px;height:25px;font-size:14px}
+ .notice{font-size:10px;padding:5px;margin-top:5px}
+}
+
+@media(min-width:801px){canvas{width:min(100%,calc(100vh - 155px));max-height:calc(100vh - 155px)}}
+
+@media(max-width:800px) and (orientation:portrait){
+ body{overflow-x:hidden;overflow-y:auto}
+ header{padding:8px 5px 4px}
+ header h1{font-size:clamp(19px,5.2vw,27px);line-height:1.15}
+ header p{font-size:11px;line-height:1.25;margin:3px 0}
+ .app{display:flex;flex-direction:column;padding:4px;gap:7px;max-width:none;height:auto}
+ .panel{padding:6px;border-radius:10px}
+ #mazeWrap{display:flex;flex-direction:column;align-items:stretch;overflow:visible}
+ canvas{width:calc(100vw - 22px);height:auto;max-width:none;max-height:none;aspect-ratio:1/1;margin:0 auto}
+ .stats{gap:4px;justify-content:space-around;margin-bottom:5px}
+ .pill{font-size:11px;padding:4px 6px}
+ .controls{grid-template-columns:1fr 1fr 1fr;width:100%;max-width:100%;gap:4px;margin:6px 0 3px}
+ .controls button{height:36px;min-width:46px;width:46px;font-size:15px;padding:3px}
+ .small{font-size:10px;line-height:1.35}
+ .gameSide{order:0}
+ .gameSide h2{font-size:17px}
+ label{font-size:12px;margin:6px 0 3px}
+ input,select,button{font-size:13px;padding:8px;border-radius:8px}
+ .question{font-size:19px;line-height:1.3;margin:9px 0}
+ .answers{gap:6px}
+ .answer{padding:8px;gap:8px;border-radius:9px;font-size:14px}
+ .letter{width:31px;height:31px;font-size:17px}
+ .notice{font-size:11px;padding:7px;margin-top:6px}
+}
+
+
+/* MODE HP RINGKAS: layar dan soal terlihat bersamaan tanpa scroll */
+@media(max-width:800px) and (orientation:portrait){
+ html,body{width:100%;height:100%;overflow:hidden;overscroll-behavior:none}
+ body{display:flex;flex-direction:column}
+ header{display:none!important}
+ header h1{font-size:17px;line-height:1.1}
+ header p{display:none}
+ .app{flex:1;min-height:0;height:auto;width:100%;padding:3px;gap:3px;display:grid;grid-template-rows:minmax(0,1.42fr) minmax(0,.58fr);grid-template-columns:minmax(0,1fr);overflow:hidden}
+ .panel{min-height:0;min-width:0;padding:4px;border-radius:8px;overflow:hidden}
+ #mazeWrap{display:flex;flex-direction:column;align-items:center;justify-content:center}
+ .stats{flex:0 0 auto;display:flex;flex-wrap:nowrap;gap:3px;margin:0 0 2px;width:100%;justify-content:space-around}
+ .pill{font-size:9px;padding:2px 4px;border-radius:5px;white-space:nowrap}
+ canvas{width:auto;height:auto;max-width:100%;max-height:calc(100% - 38px);aspect-ratio:1/1;margin:0 auto;flex:0 1 auto}
+ .controls{flex:0 0 auto;grid-template-columns:1fr 1fr 1fr;width:100%;max-width:100%;gap:5px;margin:3px 0 1px}.controls button[data-dir='left']{justify-self:start}.controls button[data-dir='right']{justify-self:end}.controls button[data-dir='up'],.controls button[data-dir='down']{justify-self:center}
+ .controls button{width:40px;min-width:40px;height:30px;padding:0;font-size:12px;border-radius:6px}
+ #mazeWrap>.small{display:none}
+ .gameSide{display:flex;flex-direction:column;gap:2px;overflow:hidden}
+ .gameSide h2{font-size:12px!important;margin:0!important;line-height:1.1}
+ .row, label[for="student"],label[for="className"],label[for="fileInput"],#student,#className,#fileInput,.gameSide>.small,#sampleBtn,#loadDefault,#restartBtn,#exportBtn,#pauseBtn,#message,#result{display:none!important}
+ #question{flex:0 0 auto;font-size:clamp(11px,3vw,14px);line-height:1.08;margin:1px 0 2px;overflow:hidden}
+ .answers{flex:1;min-height:0;display:grid;grid-template-rows:repeat(3,minmax(0,1fr));gap:2px}
+ .answer{min-height:0;padding:2px 5px;gap:4px;border-radius:6px;font-size:clamp(10px,2.8vw,12px);line-height:1.05;overflow:hidden}
+ .letter{width:18px;height:18px;font-size:10px;flex:0 0 18px}
+ #startBtn{display:block!important;flex:0 0 auto;width:100%;font-size:10px;padding:3px;margin-top:2px}
+ .gameSide .row:has(#startBtn){display:flex!important;gap:0!important;margin:0!important}
+}
+
+</style>
+<style>
+#rulesScreen{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(2,8,23,.94);overflow:auto}
+#rulesCard{width:min(620px,100%);max-height:94vh;overflow:auto;background:#fff;color:#172033;border-radius:18px;padding:20px;box-shadow:0 18px 60px #0008}
+#rulesCard h2{margin:0 0 10px;font-size:clamp(22px,5vw,30px);text-align:center;color:#1b4f9c}
+#rulesCard .rulesLead{text-align:center;margin:0 0 14px;color:#475569}
+#rulesCard ol{padding-left:22px;line-height:1.5;margin:10px 0 18px}
+#rulesCard li{margin:6px 0}
+#rulesStartBtn{display:block;width:100%;font-size:18px;padding:12px;border-radius:12px}
+@media(max-width:600px){#rulesCard{padding:16px}#rulesCard ol{font-size:14px;line-height:1.4}#rulesStartBtn{font-size:16px;padding:10px}}
+</style>
+
+</head>
+<body>
+
+<div id="rulesScreen" role="dialog" aria-modal="true" aria-labelledby="rulesTitle">
+  <div id="rulesCard">
+    <h2 id="rulesTitle">👾 Aturan Main Pac-Man Edu Quest</h2>
+    <p class="rulesLead">Baca aturan singkat ini sebelum mulai, bro!</p>
+    <ol>
+      <li><b>Mulai dari layar aturan.</b> Tekan tombol <b>Mulai Game</b> setelah selesai membaca.</li>
+      <li><b>Baca soal terlebih dahulu.</b> Setelah layar pertanyaan muncul, tekan <b>Siap Menjawab</b> untuk melanjutkan.</li>
+      <li><b>Waktu 2 menit per soal.</b> Waktu mulai berjalan ketika Pac-Man mulai bergerak memakai tombol arah.</li>
+      <li><b>Kejar jawaban yang benar.</b> Arahkan Pac-Man ke pilihan A, B, atau C di dalam labirin.</li>
+      <li><b>Jawaban benar:</b> nilai bertambah dan nyawa +1. Soal berikutnya akan muncul dan permainan berhenti sementara untuk dibaca.</li>
+      <li><b>Jawaban salah:</b> nyawa -1, muncul efek bom, lalu soal berikutnya tampil. Baca soal dan tekan <b>Siap Menjawab</b>.</li>
+      <li><b>Nyawa awal 5.</b> Jawaban salah, waktu habis, atau terkena hantu mengurangi 1 nyawa; jawaban benar menambah 1 nyawa.</li>
+      <li><b>Hantu bertambah bertahap.</b> Awalnya ada 2 hantu. Setelah 3 jawaban benar menjadi 3 hantu, setelah 5 jawaban benar menjadi 4 hantu, dan setelah 7 jawaban benar menjadi 5 hantu. Hantu juga bergerak makin cepat saat jumlahnya bertambah.</li>
+      <li><b>Hindari hantu.</b> Jika tersentuh hantu, nyawa -1 dan permainan dijeda. Tekan <b>Siap Menjawab</b> untuk lanjut.</li>
+      <li><b>Minimal menjawab 5 soal.</b> Jawaban benar maupun salah dihitung sebagai soal yang dijawab. Jika soal tersedia kurang dari 5, syarat minimal belum terpenuhi.</li>
+      <li><b>Hasil akhir:</b> setelah permainan berakhir, lihat jumlah soal benar, nilai, dan status kelulusan. Lulus jika sudah menjawab minimal 5 soal dan nilai minimal 75.</li>
+      <li><b>Jika nyawa habis</b>, permainan berakhir. Lihat hasilnya, lalu tekan <b>Ulangi Game</b> untuk mulai lagi dari soal pertama.</li>
+      <li>Gunakan tombol panah di layar HP atau tombol arah/WASD di laptop. Isi nama dan kelas jika diperlukan.</li>
+    </ol>
+    <button id="rulesStartBtn">▶ Mulai Game</button>
+  </div>
+</div>
+
+<header><h1>👾 PAC-MAN EDU QUEST</h1><p>Kejar jawaban yang benar, hindari hantu, raih skor tertinggi!</p></header>
+<main class="app">
+<section class="panel" id="mazeWrap">
+<div class="stats"><span class="pill">❤️ Nyawa: <b id="lives">5</b></span><span class="pill">⭐ Nilai: <b id="score">0</b></span><span class="pill">📝 Soal: <b id="qcount">0/0</b></span><span class="pill">⏱️ <b id="timer">00:00</b></span></div>
+<canvas id="game" width="600" height="600" aria-label="Labirin Pac-Man"></canvas>
+<div class="controls" aria-label="Kontrol arah">
+<div class="empty">.</div><button data-dir="up" aria-label="Atas">▲</button><div class="empty">.</div>
+<button data-dir="left" aria-label="Kiri">◀</button><button data-dir="down" aria-label="Bawah">▼</button><button data-dir="right" aria-label="Kanan">▶</button>
+</div>
+<p class="small">Kontrol: tombol panah/WASD di laptop atau tombol arah di HP. Sentuh/ambil jawaban A, B, atau C di labirin. Hindari hantu! Hantu makin cepat saat jumlahnya bertambah.</p>
+</section>
+<aside class="panel gameSide">
+<h2 style="margin:0 0 5px">📚 Pertanyaan</h2>
+<div class="row"><div><label for="student">Nama siswa</label><input id="student" placeholder="Nama siswa"></div><div><label for="className">Kelas</label><input id="className" placeholder="Contoh: X IPA"></div></div>
+<label for="fileInput">Unggah soal Excel/CSV (disarankan CSV)</label><input id="fileInput" type="file" accept=".csv,.txt,.json,.xlsx">
+<p class="small">Format CSV: <b>pertanyaan,A,B,C,kunci</b>. Kunci isi A/B/C. Simpan Excel sebagai CSV UTF-8. Contoh file tersedia di tombol unduh.</p>
+<div class="row"><button id="sampleBtn" class="secondary">⬇ Unduh contoh CSV</button><button id="loadDefault" class="secondary">Pakai soal contoh</button></div>
+<div id="question" class="question">Tekan “Mulai Game” untuk memulai petualangan!</div>
+<div class="answers" id="answers"></div>
+<div class="row" style="margin-top:10px"><button id="startBtn">▶ Mulai Game</button><button id="pauseBtn" class="secondary">⏸ Jeda</button></div>
+<div class="row" style="margin-top:8px"><button id="restartBtn" class="secondary">↻ Ulangi</button><button id="exportBtn" class="secondary">📥 Ekspor nilai CSV</button></div>
+<div class="notice" id="message">Tips: jawaban ditempatkan di lokasi acak setiap soal. Capai jawaban benar untuk lanjut!</div>
+<div id="result" class="notice hidden"></div>
+</aside></main>
+<style>
+#gameOverScreen{position:fixed;inset:0;z-index:10000;display:none;align-items:center;justify-content:center;padding:16px;background:rgba(2,8,23,.94);overflow:auto}
+#gameOverCard{width:min(560px,100%);max-height:94vh;overflow:auto;background:#fff;color:#172033;border-radius:18px;padding:22px;box-shadow:0 18px 60px #0008;text-align:center}
+#gameOverCard h2{margin:0 0 10px;font-size:clamp(24px,5vw,32px);color:#1b4f9c}
+#gameOverCard .go-summary{line-height:1.65;text-align:left;background:#eff6ff;border-radius:12px;padding:12px;margin:12px 0 16px}
+#gameOverCard .go-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+#gameOverCard .go-actions button{font-size:16px;padding:12px}
+#finishBtn{background:linear-gradient(90deg,#16803d,#22b45a)}
+@media(max-width:420px){#gameOverCard{padding:16px}#gameOverCard .go-actions button{font-size:14px;padding:10px}}
+</style>
+<div id="gameOverScreen" role="dialog" aria-modal="true" aria-labelledby="gameOverTitle">
+ <div id="gameOverCard">
+  <h2 id="gameOverTitle">Hasil Permainan</h2>
+  <div id="gameOverSummary" class="go-summary"></div>
+  <div class="go-actions">
+   <button id="retryBtn">↻ Ulangi Game</button>
+   <button id="finishBtn">✓ Selesai</button>
+  </div>
+ </div>
+</div>
+<script>
+const canvas=document.getElementById('game'),ctx=canvas.getContext('2d');
+const $=id=>document.getElementById(id);
+const sampleQuestions=[{"pertanyaan":"Persamaan reaksi menggambarkan peristiwa apa?","A":"Perubahan fisika","B":"Perubahan kimia","C":"Perubahan wujud saja","kunci":"B"},{"pertanyaan":"Persamaan reaksi terdiri atas dua ruas yang dipisahkan oleh tanda apa?","A":"Tanda panah","B":"Tanda sama dengan","C":"Tanda kurung","kunci":"A"},{"pertanyaan":"Zat yang bereaksi pada ruas kiri disebut …","A":"Produk","B":"Pereaksi atau reaktan","C":"Hasil reaksi","kunci":"B"},{"pertanyaan":"Zat hasil reaksi dituliskan pada ruas …","A":"Kiri","B":"Kedua-duanya selalu","C":"Kanan","kunci":"C"},{"pertanyaan":"Angka yang ditulis di depan rumus kimia disebut …","A":"Indeks","B":"Koefisien","C":"Lambang wujud","kunci":"B"},{"pertanyaan":"Menurut materi, angka koefisien menyatakan jumlah …","A":"Molekul","B":"Jenis unsur","C":"Wujud zat","kunci":"A"},{"pertanyaan":"Tanda tambah (+) pada ruas kiri berarti …","A":"Menghasilkan","B":"Terurai","C":"Bereaksi dengan","kunci":"C"},{"pertanyaan":"Tanda panah (→) dalam persamaan reaksi berarti …","A":"Menghasilkan atau menjadi","B":"Ditambah dengan","C":"Berwujud gas","kunci":"A"},{"pertanyaan":"Lambang (g) di belakang rumus kimia menunjukkan wujud …","A":"Padat","B":"Gas","C":"Cair","kunci":"B"},{"pertanyaan":"Pada persamaan CH₄(g) + 2O₂(g) → CO₂(g) + 2H₂O(g), zat hasil reaksinya adalah …","A":"CH₄ dan O₂","B":"CH₄ dan CO₂","C":"CO₂ dan H₂O","kunci":"C"}];
+let questions=[...sampleQuestions],idx=0,score=0,correctCount=0,answeredCount=0,lives=5,elapsed=0,remaining=120,timerInt=null,running=false,paused=false,roundDone=false,answerTimerStarted=false,awaitingNext=false,awaitingReady=false,gameStarted=false,gameAttempts=0;
+// Isi URL Web App Google Apps Script setelah deployment agar hasil tersimpan online.
+const GOOGLE_SHEETS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzd2yVhVqU1cnF6G7jMtLfygtxD91G4YJ7EhI8rHMwl-FbYbe9JDvo_4Y-2g2lrgTLI/exec';
+let resultSentForThisGame=false;
+function saveResultOnline(status){
+ if(resultSentForThisGame) return;
+ resultSentForThisGame=true;
+ if(!GOOGLE_SHEETS_WEB_APP_URL.startsWith('https://script.google.com/macros/s/')) return;
+ const payload={nama:$('student').value||'',kelas:$('className').value||'',skor:score,jumlah_percobaan:gameAttempts,soal_dijawab:answeredCount,soal_benar:correctCount,total_soal:questions.length,status_kelulusan:status,waktu_detik:elapsed,waktu_simpan:new Date().toISOString()};
+ fetch(GOOGLE_SHEETS_WEB_APP_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)}).catch(err=>console.warn('Hasil belum terkirim ke Google Sheets:',err));
+}
+
+const tile=30, cols=20, rows=20;
+const grid=[
+"####################",
+"#........#.........#",
+"#.####...#...####..#",
+"#......#...#.......#",
+"###.##.#.#.#.##.####",
+"#...##...#...##....#",
+"#.####.#####.####..#",
+"#..................#",
+"#.##.###...###.##..#",
+"#....#.......#.....#",
+"####.#.#####.#.######",
+"#......#...#........#",
+"#.####.#.#.#.####...#",
+"#......#.#.#........#",
+"#.######.#.######...#",
+"#.................#.#",
+"#.####.#####.####...#",
+"#......#...#.........#",
+"#........#...........#",
+"####################"
+];
+let walls=[],pellets=[],player={x:1,y:1,dir:{x:0,y:0},next:{x:0,y:0}},ghosts=[],targets=[],raf=0,last=0,moveAcc=0,ghostAcc=0,bombEffect=null;
+function makeMaze(){walls=[];pellets=[];for(let y=0;y<rows;y++){walls[y]=[];for(let x=0;x<cols;x++){let wall=((grid[y] && grid[y][x])||'#')==='#';walls[y][x]=wall;if(!wall)pellets.push({x,y,got:false})}}}
+function walk(x,y){return x>=0&&y>=0&&x<cols&&y<rows&&!walls[y][x]}
+function randomCell(used=[]){let opts=[];for(let y=1;y<rows-1;y++)for(let x=1;x<cols-1;x++)if(walk(x,y)&&!used.some(p=>p.x===x&&p.y===y))opts.push({x,y});return opts[Math.floor(Math.random()*opts.length)]||{x:1,y:1}}
+function resetPositions(){player={x:1,y:1,dir:{x:0,y:0},next:{x:0,y:0}};const n=2+(correctCount>=3?1:0)+(correctCount>=5?1:0)+(correctCount>=7?1:0)+(correctCount>=10?1:0);ghosts=[];for(let i=0;i<n;i++){ghosts.push({...randomCell([{x:1,y:1},...ghosts]),color:['#ff4d64','#f77cff','#28d9ff','#ffb347','#78f06b','#ff82c8'][i%6],speed:1+(n-2)*0.18})}targets=[];let used=[{x:1,y:1},...ghosts];let letters=['A','B','C'];letters.sort(()=>Math.random()-.5);letters.forEach((letter)=>{let p=randomCell(used);used.push(p);targets.push({...p,letter})});}
+function setupRound(){makeMaze();resetPositions();roundDone=false;answerTimerStarted=false;remaining=120;$('timer').textContent='02:00';document.getElementById('answers').innerHTML='';if(questions.length){let q=questions[idx%questions.length];$('question').textContent=`${idx+1}. ${q.pertanyaan}`;['A','B','C'].forEach(l=>{let d=document.createElement('div');d.className='answer';d.innerHTML=`<span class="letter ${l}">${l}</span><span>${q[l]}</span>`;$('answers').appendChild(d)});$('qcount').textContent=`${Math.min(idx+1,questions.length)}/${questions.length}`;}draw();}
+function draw(){ctx.clearRect(0,0,600,600);ctx.fillStyle='#030a19';ctx.fillRect(0,0,600,600);
+for(let y=0;y<rows;y++)for(let x=0;x<cols;x++){let px=x*tile,py=y*tile;if(walls[y][x]){ctx.fillStyle='#073c91';ctx.fillRect(px+1,py+1,tile-2,tile-2);ctx.strokeStyle='#168dff';ctx.lineWidth=2;ctx.strokeRect(px+4,py+4,tile-8,tile-8)}}
+pellets.forEach(p=>{if(!p.got){ctx.beginPath();ctx.fillStyle='#ffd64d';ctx.arc(p.x*tile+15,p.y*tile+15,2.5,0,Math.PI*2);ctx.fill()}});
+targets.forEach(t=>{ctx.beginPath();ctx.fillStyle=({A:'#167bff',B:'#ef3948',C:'#19a75b'})[t.letter];ctx.arc(t.x*tile+15,t.y*tile+15,12,0,Math.PI*2);ctx.fill();ctx.lineWidth=2;ctx.strokeStyle='#fff';ctx.stroke();ctx.fillStyle='#fff';ctx.font='bold 15px Arial';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(t.letter,t.x*tile+15,t.y*tile+15)});
+ghosts.forEach(g=>{ctx.fillStyle=g.color;ctx.beginPath();ctx.arc(g.x*tile+15,g.y*tile+14,11,Math.PI,0);ctx.lineTo(g.x*tile+26,g.y*tile+26);ctx.lineTo(g.x*tile+20,g.y*tile+22);ctx.lineTo(g.x*tile+15,g.y*tile+26);ctx.lineTo(g.x*tile+9,g.y*tile+22);ctx.lineTo(g.x*tile+4,g.y*tile+26);ctx.closePath();ctx.fill();ctx.fillStyle='white';ctx.beginPath();ctx.arc(g.x*tile+11,g.y*tile+13,3.5,0,7);ctx.arc(g.x*tile+19,g.y*tile+13,3.5,0,7);ctx.fill();ctx.fillStyle='#092044';ctx.beginPath();ctx.arc(g.x*tile+12,g.y*tile+14,1.5,0,7);ctx.arc(g.x*tile+20,g.y*tile+14,1.5,0,7);ctx.fill()});
+ctx.fillStyle='#ffdc32';ctx.beginPath();let px=player.x*tile+15,py=player.y*tile+15;let angle=Math.atan2(player.dir.y,player.dir.x);if(!player.dir.x&&!player.dir.y)angle=0;ctx.moveTo(px,py);ctx.arc(px,py,12,angle+.35,angle+Math.PI*2-.35);ctx.closePath();ctx.fill();
+if(!running){ctx.fillStyle='#0009';ctx.fillRect(0,0,600,600);ctx.fillStyle='#fff';ctx.font='bold 24px Arial';ctx.textAlign='center';ctx.fillText(idx>=questions.length?'SELESAI!':'PAC-MAN EDU QUEST',300,285);ctx.font='16px Arial';ctx.fillText(idx>=questions.length?'Lihat hasil permainan':(awaitingReady?'Tekan Siap Menjawab':'Tekan Mulai Game'),300,315)}
+ if(bombEffect && Date.now()<bombEffect.until){
+  const remain=bombEffect.until-Date.now();
+  ctx.fillStyle='rgba(255,20,20,'+(0.20+0.18*Math.abs(Math.sin(remain/85)))+')';ctx.fillRect(0,0,600,600);
+  ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='bold 78px Arial';ctx.fillText('💥',300,245);
+  ctx.font='bold 25px Arial';ctx.lineWidth=5;ctx.strokeStyle='#650000';ctx.strokeText(bombEffect.label,300,315);ctx.fillStyle='#fff';ctx.fillText(bombEffect.label,300,315);
+ }}
+function showBombEffect(label){
+ bombEffect={until:Date.now()+1150,label};
+ draw();
+ setTimeout(()=>{if(bombEffect && Date.now()>=bombEffect.until){bombEffect=null;draw()}},1200);
+}
+function moveEntity(e,d){let nx=e.x+d.x,ny=e.y+d.y;if(walk(nx,ny)){e.x=nx;e.y=ny;return true}return false}
+function tick(ts){if(!running||paused)return;let dt=Math.min(50,ts-last);last=ts;moveAcc+=dt;ghostAcc+=dt;if(moveAcc>125){if(walk(player.x+player.next.x,player.y+player.next.y)){player.dir={...player.next}}if(moveEntity(player,player.dir)){let p=pellets.find(p=>p.x===player.x&&p.y===player.y);if(p)p.got=true;}moveAcc=0;checkTargets()}
+const ghostInterval=Math.max(150,360-(ghosts.length-2)*45);if(ghostAcc>ghostInterval){ghosts.forEach(g=>{let dirs=[{x:1,y:0},{x:-1,y:0},{x:0,y:1},{x:0,y:-1}].filter(d=>walk(g.x+d.x,g.y+d.y));if(dirs.length){dirs.sort((a,b)=>Math.abs(g.x+a.x-player.x)+Math.abs(g.y+a.y-player.y)-(Math.abs(g.x+b.x-player.x)+Math.abs(g.y+b.y-player.y)));let d=Math.random()<.75?dirs[0]:dirs[Math.floor(Math.random()*dirs.length)];g.x+=d.x;g.y+=d.y}});ghostAcc=0;checkCollision()}
+draw();raf=requestAnimationFrame(tick)}
+function checkTargets(){
+ let t=targets.find(t=>t.x===player.x&&t.y===player.y);
+ if(!t||roundDone)return;
+ roundDone=true;paused=true;awaitingReady=false;
+ answeredCount++;
+ const q=questions[idx%questions.length];
+ if(t.letter===q.kunci){
+   correctCount++;score=gradeFor(correctCount);lives++;
+   const milestoneGhosts={3:3,5:4,7:5};
+   $('message').textContent=milestoneGhosts[correctCount]
+     ? '🎉 Jawaban benar! +1 nyawa. Hantu bertambah menjadi '+milestoneGhosts[correctCount]+'! Hati-hati, bro!'
+     : '🎉 Jawaban benar! +1 nyawa. Soal berikutnya sudah muncul. Baca dulu, lalu tekan “Siap Menjawab”.';
+  }else{
+  lives--;
+  showBombEffect('JAWABAN SALAH! -1 NYAWA');
+  $('message').textContent='Belum tepat. Jawaban benar: '+q.kunci+'. Nyawa berkurang 1.';
+ }
+ $('score').textContent=score;$('lives').textContent=lives;
+ cancelAnimationFrame(raf);
+ if(lives<=0){endGame(false);return}
+ idx++;
+ if(idx>=questions.length){endGame(true);return}
+ setupRound();
+ paused=true;roundDone=false;answerTimerStarted=false;awaitingReady=true;
+ $('startBtn').textContent='▶ Siap Menjawab';
+ $('message').textContent=(t.letter===q.kunci?'🎉 Benar! +1 nyawa. ':'Jawaban belum tepat, -1 nyawa. ')+'Soal berikutnya sudah muncul. Waktu berhenti saat membaca. Tekan “Siap Menjawab” jika sudah siap.';
+ draw();
+}
+function checkCollision(){
+ if(!ghosts.some(g=>g.x===player.x&&g.y===player.y))return;
+ lives--;$('lives').textContent=lives;
+ showBombEffect('KENA HANTU! -1 NYAWA');
+ if(lives<=0){endGame(false);return}
+ $('message').textContent='👻 Tertangkap hantu! Nyawa berkurang 1. Permainan dijeda; tekan “Siap Menjawab” untuk lanjut.';
+ paused=true;awaitingReady=true;answerTimerStarted=false;remaining=120;$('timer').textContent='02:00';
+ resetPositions();$('startBtn').textContent='▶ Siap Menjawab';cancelAnimationFrame(raf);draw();
+}
+function start(){
+ if(!questions.length){alert('Unggah soal CSV atau pilih soal contoh dulu.');return}
+ if(running && awaitingReady){
+  paused=false;awaitingReady=false;roundDone=false;answerTimerStarted=false;
+  $('startBtn').textContent='▶ Siap Menjawab';
+  $('message').textContent='Siap! Waktu mulai dihitung saat Pac-Man mulai bergerak.';
+  last=performance.now();cancelAnimationFrame(raf);raf=requestAnimationFrame(tick);return;
+ }
+ if(!gameStarted || !running){
+  resultSentForThisGame=false;
+  gameAttempts++;
+  if(idx>=questions.length || lives<=0){idx=0;score=0;correctCount=0;answeredCount=0;lives=5;elapsed=0}
+  running=true;gameStarted=true;paused=true;awaitingReady=true;
+  $('result').classList.add('hidden');
+  $('score').textContent=score;$('lives').textContent=lives;
+  setupRound();paused=true;awaitingReady=true;
+  $('startBtn').textContent='▶ Siap Menjawab';
+  $('message').textContent='Baca soal terlebih dahulu. Waktu 2 menit masih berhenti. Tekan “Siap Menjawab” jika sudah siap.';
+  last=performance.now();cancelAnimationFrame(raf);raf=requestAnimationFrame(tick);
+  if(timerInt)clearInterval(timerInt);
+  timerInt=setInterval(()=>{
+   if(running&&!paused&&answerTimerStarted&&!roundDone){
+    remaining--;elapsed++;
+    $('timer').textContent=String(Math.floor(remaining/60)).padStart(2,'0')+':'+String(remaining%60).padStart(2,'0');
+    if(remaining<=0){
+     paused=true;roundDone=true;answerTimerStarted=false;answeredCount++;lives--;$('lives').textContent=lives;
+     if(lives<=0){endGame(false);return}
+     $('message').textContent='⏰ Waktu habis! Nyawa berkurang 1. Baca soal lagi, lalu tekan “Siap Menjawab”.';
+     setupRound();paused=true;roundDone=false;awaitingReady=true;$('startBtn').textContent='▶ Siap Menjawab';
+     $('message').textContent='⏰ Waktu habis, nyawa berkurang 1. Soal siap dibaca; tekan “Siap Menjawab” untuk mencoba.';
+     cancelAnimationFrame(raf);draw();
+    }
+   }
+  },1000);
+ }
+}
+function endGame(won){
+  running=false;paused=false;awaitingReady=false;gameStarted=false;
+  clearInterval(timerInt);timerInt=null;cancelAnimationFrame(raf);
+  const passed=answeredCount>=5&&score>=75;
+  const perfect=idx>=questions.length && correctCount===questions.length;
+  const status=passed?'LULUS':'TIDAK LULUS';
+  saveResultOnline(status);
+  const explanation=answeredCount<5
+    ?'Belum memenuhi minimal 5 soal yang dijawab.'
+    :(score<75?'Nilai belum mencapai batas lulus 75.':'Memenuhi syarat minimal 5 soal dan nilai minimal 75.');
+  const summary=`<b>📊 HASIL PERMAINAN</b><br>Nama: ${escapeHtml($('student').value||'-')}<br>Kelas: ${escapeHtml($('className').value||'-')}<br>Soal dijawab: ${answeredCount} dari ${questions.length}<br>Soal benar: ${correctCount}<br>Nilai: ${score}<br>Status: <b>${passed?'✅ LULUS':'❌ TIDAK LULUS'}</b><br>Keterangan: ${explanation}<br>Waktu: ${$('timer').textContent}`;
+  $('message').textContent=passed?'🏆 LULUS! Hebat, bro!':'Permainan berakhir. Status: TIDAK LULUS.';
+  $('startBtn').textContent='↻ Ulangi Game';
+  $('result').classList.remove('hidden');
+  $('result').innerHTML=summary;
+  $('gameOverTitle').textContent=passed?'🏆 '+(perfect?'SELESAI! SEMUA JAWABAN BENAR':'SELAMAT, KAMU LULUS!'):'❌ PERMAINAN BERAKHIR';
+  $('gameOverSummary').innerHTML=summary;
+  // Tombol sesuai hasil: nilai < 76 hanya ulangi; nilai >= 76 ulangi + selesai; semua benar hanya selesai.
+  $('retryBtn').style.display=perfect?'none':'block';
+  $('finishBtn').style.display=(score>=76||perfect)?'block':'none';
+  $('finishBtn').textContent='✓ Selesai';
+  $('gameOverScreen').style.display='flex';
+  draw();
+}
+function gradeFor(n){const grades=[0,20,40,55,65,76,80,83,86,88,90];return grades[Math.max(0,Math.min(10,n))]}
+function escapeHtml(s){return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function setDir(dir){const d={up:{x:0,y:-1},down:{x:0,y:1},left:{x:-1,y:0},right:{x:1,y:0}}[dir];if(d&&running&&!paused&&!roundDone){player.next=d;if(!answerTimerStarted){answerTimerStarted=true;$('message').textContent='⏱ Waktu menjawab dimulai! Sisa waktu 2 menit.'}}}
+document.querySelectorAll('[data-dir]').forEach(b=>{
+   const press=e=>{
+     e.preventDefault();
+     e.stopPropagation();
+     setDir(b.dataset.dir);
+   };
+   if(window.PointerEvent){
+     b.addEventListener('pointerdown',press,{passive:false});
+     b.addEventListener('pointerup',e=>e.preventDefault(),{passive:false});
+     b.addEventListener('pointercancel',e=>e.preventDefault(),{passive:false});
+   } else {
+     b.addEventListener('touchstart',press,{passive:false});
+     b.addEventListener('touchend',e=>e.preventDefault(),{passive:false});
+     b.addEventListener('mousedown',press);
+   }
+   b.addEventListener('contextmenu',e=>e.preventDefault());
+});
+// Area kontrol dibuat toleran: sentuhan di ruang kosong dekat panah tetap memilih arah terdekat.
+const controlPad=document.querySelector('.controls');
+controlPad.addEventListener('pointerdown',e=>{
+  if(e.target.closest('[data-dir]')) return;
+  e.preventDefault();
+  const r=controlPad.getBoundingClientRect();
+  const x=e.clientX-r.left, y=e.clientY-r.top;
+  const cx=r.width/2, cy=r.height/2;
+  const dx=x-cx, dy=y-cy;
+  if(Math.abs(dx)>Math.abs(dy)) setDir(dx<0?'left':'right');
+  else setDir(dy<0?'up':'down');
+},{passive:false});
+// Saat permainan aktif, sentuhan pada area labirin menjadi kontrol arah dan mencegah gestur browser/scroll.
+const gameCanvas=document.getElementById('game');
+gameCanvas.style.touchAction='none';
+gameCanvas.addEventListener('pointerdown',e=>{
+  e.preventDefault();
+  if(!running||paused||roundDone)return;
+  const r=gameCanvas.getBoundingClientRect();
+  const x=e.clientX-r.left, y=e.clientY-r.top;
+  const left=x, right=r.width-x, top=y, bottom=r.height-y;
+  const nearest=Math.min(left,right,top,bottom);
+  if(nearest===left)setDir('left');
+  else if(nearest===right)setDir('right');
+  else if(nearest===top)setDir('up');
+  else setDir('down');
+},{passive:false});
+// Kunci gestur browser pada area permainan agar sentuhan hanya mengendalikan arah.
+// Abaikan sentuhan di ruang kosong area labirin agar gestur browser tidak mengganggu.
+document.getElementById('mazeWrap').addEventListener('pointerdown',e=>{
+   if(!e.target.closest('button,[data-dir]')) e.preventDefault();
+},{passive:false});
+document.getElementById('mazeWrap').addEventListener('contextmenu',e=>e.preventDefault());
+// Setelah Siap Menjawab, sentuhan di area labirin menjadi kontrol arah.
+// Bagian kiri/kanan menggerakkan horizontal; bagian atas/bawah menggerakkan vertikal.
+canvas.addEventListener('pointerdown',e=>{
+  if(!running || paused || roundDone) return;
+  e.preventDefault(); e.stopPropagation();
+  const r=canvas.getBoundingClientRect();
+  const nx=(e.clientX-r.left)/r.width;
+  const ny=(e.clientY-r.top)/r.height;
+  const dx=nx-0.5, dy=ny-0.5;
+  if(Math.abs(dx)>Math.abs(dy)) setDir(dx<0?'left':'right');
+  else setDir(dy<0?'up':'down');
+},{passive:false});
+canvas.addEventListener('contextmenu',e=>e.preventDefault());
+
+window.addEventListener('keydown',e=>{let k=e.key.toLowerCase();let map={arrowup:'up',w:'up',arrowdown:'down',s:'down',arrowleft:'left',a:'left',arrowright:'right',d:'right'};if(map[k]){e.preventDefault();setDir(map[k])}});
+$('retryBtn').onclick=()=>{
+  $('gameOverScreen').style.display='none';
+  running=false;paused=false;awaitingNext=false;awaitingReady=false;gameStarted=false;
+  idx=0;score=0;correctCount=0;answeredCount=0;lives=5;elapsed=0;remaining=120;answerTimerStarted=false;resultSentForThisGame=false;gameAttempts++;
+  clearInterval(timerInt);timerInt=null;
+  $('score').textContent='0';$('lives').textContent='5';$('timer').textContent='02:00';
+  $('startBtn').textContent='▶ Mulai Game';
+  $('message').textContent='Game diulang dari soal pertama.';
+  setupRound();
+  running=true;gameStarted=true;paused=true;awaitingReady=true;
+  $('startBtn').textContent='▶ Siap Menjawab';
+  if(timerInt)clearInterval(timerInt);
+  timerInt=setInterval(()=>{
+    if(running&&!paused&&answerTimerStarted&&!roundDone){
+      remaining--;elapsed++;
+      $('timer').textContent=String(Math.floor(remaining/60)).padStart(2,'0')+':'+String(remaining%60).padStart(2,'0');
+      if(remaining<=0){
+        paused=true;roundDone=true;answerTimerStarted=false;answeredCount++;lives--;$('lives').textContent=lives;
+        if(lives<=0){endGame(false);return}
+        setupRound();paused=true;roundDone=false;awaitingReady=true;$('startBtn').textContent='▶ Siap Menjawab';
+        $('message').textContent='⏰ Waktu habis, nyawa berkurang 1. Baca soal lalu tekan “Siap Menjawab”.';
+        cancelAnimationFrame(raf);draw();
+      }
+    }
+  },1000);
+};
+$('finishBtn').onclick=()=>{
+   $('gameOverScreen').style.display='none';
+   // Keluar dari layar permainan dan kembali ke layar aturan/pembuka.
+   running=false;paused=false;awaitingReady=false;gameStarted=false;
+   clearInterval(timerInt);timerInt=null;cancelAnimationFrame(raf);
+   $('rulesScreen').style.display='flex';
+};
+$('startBtn').onclick=start;
+$('rulesStartBtn').onclick=()=>{
+  $('rulesScreen').style.display='none';
+  start();
+};$('pauseBtn').onclick=()=>{if(running){paused=!paused;$('pauseBtn').textContent=paused?'▶ Lanjut':'⏸ Jeda';if(!paused){last=performance.now();raf=requestAnimationFrame(tick)}else cancelAnimationFrame(raf)}};
+$('restartBtn').onclick=()=>{$('gameOverScreen').style.display='none';running=false;paused=false;awaitingNext=false;awaitingReady=false;gameStarted=false;idx=0;score=0;correctCount=0;answeredCount=0;lives=5;elapsed=0;remaining=120;answerTimerStarted=false;$('startBtn').textContent='▶ Mulai Game';clearInterval(timerInt);timerInt=null;$('score').textContent='0';$('lives').textContent='5';$('timer').textContent='02:00';setupRound();draw();$('message').textContent='Baca aturan main terlebih dahulu.';$('rulesScreen').style.display='flex'};
+$('loadDefault').onclick=()=>{running=false;paused=false;awaitingReady=false;gameStarted=false;questions=[...sampleQuestions];idx=0;score=0;correctCount=0;answeredCount=0;lives=5;$('message').textContent='Soal contoh siap dimainkan.';setupRound()};
+$('sampleBtn').onclick=()=>{let csv='pertanyaan,A,B,C,kunci\n'+sampleQuestions.map(q=>[q.pertanyaan,q.A,q.B,q.C,q.kunci].map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');download('contoh_soal_pacman.csv',csv)};
+function download(name,content){
+ let blob=new Blob(['\ufeff'+content],{type:'text/csv;charset=utf-8;'}),url=URL.createObjectURL(blob),a=document.createElement('a');
+ a.href=url;a.download=name;a.style.display='none';document.body.appendChild(a);a.click();
+ setTimeout(()=>{URL.revokeObjectURL(url);a.remove()},1500);
+}
+$('fileInput').addEventListener('change',async e=>{let f=e.target.files[0];if(!f)return;try{let txt=await f.text();if(f.name.toLowerCase().endsWith('.json')){questions=JSON.parse(txt)}else if(f.name.toLowerCase().endsWith('.xlsx')){alert('Bro, untuk versi offline tanpa library tambahan, simpan Excel sebagai CSV UTF-8 dulu ya.');return}else{questions=parseCSV(txt)}if(!questions.length)throw Error('Tidak ada soal valid');questions=questions.map(q=>({pertanyaan:q.pertanyaan||q.question||q.soal,A:q.A||q.a||q.opsi_a,B:q.B||q.b||q.opsi_b,C:q.C||q.c||q.opsi_c,kunci:String(q.kunci||q.key||q.jawaban||'').trim().toUpperCase()}));if(questions.some(q=>!q.pertanyaan||!q.A||!q.B||!q.C||!['A','B','C'].includes(q.kunci)))throw Error('Periksa kolom pertanyaan, A, B, C, kunci (kunci harus A/B/C).');running=false;paused=false;awaitingReady=false;gameStarted=false;idx=0;score=0;correctCount=0;answeredCount=0;lives=5;$('startBtn').textContent='▶ Mulai Game';$('message').textContent=`Berhasil memuat ${questions.length} soal. Tekan Mulai Game.`;setupRound()}catch(err){alert('Gagal membaca soal: '+err.message+'\nGunakan format CSV contoh yang disediakan.')}});
+function parseCSV(text){let lines=text.replace(/^\ufeff/,'').split(/\r?\n/).filter(l=>l.trim());if(lines.length<2)return[];function row(line){let out=[],cur='',quote=false;for(let i=0;i<line.length;i++){let c=line[i];if(c==='"'&&line[i+1]==='"'&&quote){cur+='"';i++}else if(c==='"')quote=!quote;else if(c===','&&!quote){out.push(cur);cur=''}else cur+=c}out.push(cur);return out}let head=row(lines.shift()).map(x=>x.trim().toLowerCase());return lines.map(l=>{let vals=row(l),o={};head.forEach((h,i)=>o[h]=(vals[i]||'').trim());return o})}
+$('exportBtn').onclick=()=>{let row=[['nama','kelas','skor','jumlah_percobaan','soal_dijawab','soal_benar','total_soal','status_kelulusan','waktu_detik'],[$('student').value,$('className').value,score,gameAttempts,answeredCount,correctCount,questions.length,(answeredCount>=5&&score>=75?'LULUS':'TIDAK LULUS'),elapsed]];download('hasil_pacman.csv',row.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n'))};
+makeMaze();setupRound();draw();
+</script>
+
+
+
+
+<style id="anti-blue-selection-fix">
+/* Cegah handle seleksi teks Android menutupi area pertanyaan */
+html, body, #question, .gameSide, .answers, .answer, .panel {
+  -webkit-user-select: none !important; user-select: none !important;
+  -webkit-touch-callout: none !important;
+}
+::selection { background: transparent !important; color: inherit !important; }
+::-moz-selection { background: transparent !important; color: inherit !important; }
+</style>
+<script id="anti-blue-selection-script">
+(function(){
+  function clearGameTextSelection(){
+    try {
+      const sel = window.getSelection && window.getSelection();
+      if (sel && sel.rangeCount) {
+        const node = sel.anchorNode;
+        const el = node && (node.nodeType === 1 ? node : node.parentElement);
+        if (el && el.closest && el.closest('#question, .gameSide, .answers, .answer')) sel.removeAllRanges();
+      }
+    } catch(e) {}
+  }
+  document.addEventListener('selectionchange', clearGameTextSelection);
+  document.addEventListener('contextmenu', function(e){ if(e.target.closest && e.target.closest('#question, .gameSide, .answers, .answer')) e.preventDefault(); }, {passive:false});
+})();
+</script>
+
+
+<style id="separate-up-down-arrows">
+/* Jarak vertikal panah atas dan bawah diperlebar agar mudah disentuh di HP */
+.controls{row-gap:14px!important}
+@media(max-width:800px) and (orientation:portrait){
+  .controls{row-gap:10px!important}
+}
+@media(max-width:800px) and (orientation:landscape){
+  .controls{row-gap:10px!important}
+}
+</style>
+</body></html>
