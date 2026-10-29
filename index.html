@@ -101,6 +101,41 @@ label{display:block;font-size:13px;color:#bfeaff;margin:7px 0 4px}input,select,b
 </head>
 <body>
 
+<style id="student-identity-gate-style">
+#identityScreen{position:fixed;inset:0;z-index:10001;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(2,8,23,.97);overflow:auto}
+#identityCard{width:min(480px,100%);background:#fff;color:#172033;border-radius:18px;padding:22px;box-shadow:0 18px 60px #0008}
+#identityCard h2{margin:0 0 8px;text-align:center;color:#1b4f9c;font-size:clamp(22px,5vw,29px)}
+#identityCard p{margin:0 0 16px;text-align:center;color:#475569}
+#identityCard label{display:block;color:#334155;font-size:14px;font-weight:700;margin:10px 0 5px}
+#identityCard input,#identityCard select{width:100%;padding:12px;border:1px solid #94a3b8;border-radius:10px;background:#fff;color:#172033;font-size:16px}
+#identityCard button{width:100%;margin-top:16px;padding:12px;font-size:17px;border-radius:11px}
+#identityError{display:none;color:#b91c1c;font-size:13px;margin-top:8px}
+@media(max-width:600px){#identityCard{padding:18px}#identityCard button{font-size:16px}}
+</style>
+
+
+<div id="identityScreen" role="dialog" aria-modal="true" aria-labelledby="identityTitle">
+ <div id="identityCard">
+  <h2 id="identityTitle">🎮 Identitas Pemain</h2>
+  <p>Isi nama dan kelas sebelum memulai Pac-Man Edu Quest.</p>
+  <form id="identityForm">
+   <label for="studentGate">Nama lengkap siswa</label>
+   <input id="studentGate" type="text" maxlength="100" autocomplete="name" placeholder="Ketik nama lengkap" required>
+   <label for="classGate">Kelas</label>
+   <select id="classGate" required>
+    <option value="">— Pilih kelas —</option>
+    <option value="X AT 1">X AT 1</option>
+    <option value="X AT 2">X AT 2</option>
+    <option value="X AT 3">X AT 3</option>
+    <option value="X AT 4">X AT 4</option>
+   </select>
+   <div id="identityError" role="alert">Nama dan kelas wajib diisi.</div>
+   <button type="submit" id="identityContinue">Lanjut ke Aturan Main ▶</button>
+  </form>
+ </div>
+</div>
+
+
 <div id="rulesScreen" role="dialog" aria-modal="true" aria-labelledby="rulesTitle">
   <div id="rulesCard">
     <h2 id="rulesTitle">👾 Aturan Main Pac-Man Edu Quest</h2>
@@ -118,7 +153,7 @@ label{display:block;font-size:13px;color:#bfeaff;margin:7px 0 4px}input,select,b
       <li><b>Minimal menjawab 5 soal.</b> Jawaban benar maupun salah dihitung sebagai soal yang dijawab. Jika soal tersedia kurang dari 5, syarat minimal belum terpenuhi.</li>
       <li><b>Hasil akhir:</b> setelah permainan berakhir, lihat jumlah soal benar, nilai, dan status kelulusan. Lulus jika sudah menjawab minimal 5 soal dan nilai minimal 75.</li>
       <li><b>Jika nyawa habis</b>, permainan berakhir. Lihat hasilnya, lalu tekan <b>Ulangi Game</b> untuk mulai lagi dari soal pertama.</li>
-      <li>Gunakan tombol panah di layar HP atau tombol arah/WASD di laptop. Isi nama dan kelas jika diperlukan.</li>
+      <li>Gunakan tombol panah di layar HP atau tombol arah/WASD di laptop. Nama dan kelas wajib diisi sebelum bermain.</li>
     </ol>
     <button id="rulesStartBtn">▶ Mulai Game</button>
   </div>
@@ -168,6 +203,33 @@ label{display:block;font-size:13px;color:#bfeaff;margin:7px 0 4px}input,select,b
   </div>
  </div>
 </div>
+
+<script id="student-identity-gate-script">
+(function(){
+ const form=document.getElementById('identityForm');
+ const gateName=document.getElementById('studentGate');
+ const gateClass=document.getElementById('classGate');
+ const err=document.getElementById('identityError');
+ form.addEventListener('submit',function(e){
+   e.preventDefault();
+   const name=gateName.value.trim(), cls=gateClass.value;
+   if(!name || !cls){
+     err.style.display='block';
+     if(!name) gateName.focus(); else gateClass.focus();
+     return;
+   }
+   document.getElementById('student').value=name;
+   document.getElementById('className').value=cls;
+   document.getElementById('identityScreen').style.display='none';
+   document.getElementById('rulesScreen').style.display='flex';
+ });
+ gateName.addEventListener('input',()=>{if(gateName.value.trim())err.style.display='none'});
+ gateClass.addEventListener('change',()=>{if(gateClass.value)err.style.display='none'});
+ // Keep the identity modal visible until the form is submitted.
+ document.getElementById('rulesScreen').style.display='flex';
+})();
+</script>
+
 <script>
 const canvas=document.getElementById('game'),ctx=canvas.getContext('2d');
 const $=id=>document.getElementById(id);
